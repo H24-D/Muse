@@ -1,0 +1,86 @@
+import { useState, useEffect } from "react";
+import RoomForm from "./components/RoomForm";
+import AudioPlayer from "./components/AudioPlayer";
+import ChatBox from "./components/ChatBox";
+import socket from "./socket";
+
+function App() {
+  const [joined, setJoined] = useState(false);
+  const [room, setRoom] = useState("");
+  const [name, setName] = useState("");
+
+  // Auto-join if room is in URL and name is saved
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomFromUrl = params.get("room");
+
+    if (roomFromUrl) {
+      setRoom(roomFromUrl);
+      const savedName = localStorage.getItem("userName");
+      if (savedName) {
+        setName(savedName);
+        socket.emit("join", roomFromUrl);
+        setJoined(true);
+      }
+    }
+  }, []);
+
+  const handleJoin = (roomId, userName) => {
+    setRoom(roomId);
+    setName(userName);
+    localStorage.setItem("userName", userName); // So we can auto-join later
+    socket.emit("join", roomId);
+    setJoined(true);
+  };
+
+  return (
+    <>
+      {!joined ? (
+        <RoomForm onJoin={handleJoin} />
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center px-6 py-12">
+          <div className="w-full max-w-6xl bg-gray-900 text-white rounded-xl shadow-xl border border-gray-700 p-10 space-y-12">
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+              <h2 className="text-4xl font-bold text-center text-white">
+                🎶 Welcome to <span className="text-indigo-400">Muse</span>
+              </h2>
+
+              {/* Room Badge */}
+              <div className="bg-gray-800 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500 font-mono text-sm shadow">
+                Room ID: <span className="font-semibold">{room}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <AudioPlayer room={room} name={name} />
+              <ChatBox room={room} name={name} />
+            </div>
+
+            <div className="text-center mt-10">
+              <p className="text-md font-semibold mb-3 text-gray-300">
+                🔗 Share this Room
+              </p>
+              <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap shadow-sm">
+                <span className="text-sm font-mono break-all text-gray-400">
+                  {`${window.location.origin}/?room=${room}`}
+                </span>
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/?room=${room}`
+                    )
+                  }
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+                >
+                  📋 Copy Link
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default App;
