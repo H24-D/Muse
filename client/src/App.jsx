@@ -1,16 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import RoomForm from "./components/RoomForm";
 import AudioPlayer from "./components/AudioPlayer";
 import ChatBox from "./components/ChatBox";
+import ServerWakeup from "./components/ServerWakeup";
 import socket from "./socket";
 
 function App() {
   const [joined, setJoined] = useState(false);
   const [room, setRoom] = useState("");
   const [name, setName] = useState("");
+  const [serverReady, setServerReady] = useState(false);
+
+  const handleServerReady = useCallback(() => {
+    setServerReady(true);
+  }, []);
 
   // Auto-join if room is in URL and name is saved
   useEffect(() => {
+    if (!serverReady) return;
     const params = new URLSearchParams(window.location.search);
     const roomFromUrl = params.get("room");
 
@@ -23,15 +30,20 @@ function App() {
         setJoined(true);
       }
     }
-  }, []);
+  }, [serverReady]);
 
   const handleJoin = (roomId, userName) => {
     setRoom(roomId);
     setName(userName);
-    localStorage.setItem("userName", userName); // So we can auto-join later
+    localStorage.setItem("userName", userName);
     socket.emit("join", roomId);
     setJoined(true);
   };
+
+  // Show loading screen until backend is reachable
+  if (!serverReady) {
+    return <ServerWakeup onReady={handleServerReady} />;
+  }
 
   return (
     <>
