@@ -10,12 +10,16 @@ const server = http.createServer(app);
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all for dev
-    methods: ["GET", "POST"]
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || "*",
+  credentials: true
+}));
 
 app.get("/", (req, res) => {
   res.send("Muse backend is running 🎵");
