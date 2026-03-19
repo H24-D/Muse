@@ -17,7 +17,6 @@ const storage = new CloudinaryStorage({
   params: {
     resource_type: "video",
     folder: "muse-audio",
-    // ❌ removed format: "mp3" — causes Cloudinary free tier errors
   },
 });
 
@@ -51,11 +50,11 @@ io.on("connection", (socket) => {
 
   socket.on("join", (roomId) => {
     socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
+    console.log("User", socket.id, "joined room", roomId);
   });
 
   socket.on("audio-loaded", ({ room, url, filename }) => {
-    console.log(`Audio loaded in room ${room}: ${url}`);
+    console.log("Audio loaded in room", room, url);
     socket.to(room).emit("audio-loaded", { url, filename });
   });
 
@@ -72,12 +71,3 @@ io.on("connection", (socket) => {
 server.listen(process.env.PORT || 5000, () => {
   console.log("Server running");
 });
-```
-
----
-
-After pushing, try uploading and check Render logs for:
-```
-Upload request received
-File uploaded: https://res.cloudinary.com/...
-Audio loaded in room 1111: https://...
