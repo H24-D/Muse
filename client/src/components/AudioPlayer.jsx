@@ -34,36 +34,40 @@ export default function AudioPlayer({ room, name }) {
   }, []);
 
   const loadAudio = async (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
 
-    setUploading(true);
+  setUploading(true);
+  console.log("Starting upload to:", `${BACKEND_URL}/upload`);
 
-    const formData = new FormData();
-    formData.append("audio", selectedFile);
+  const formData = new FormData();
+  formData.append("audio", selectedFile);
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
+  try {
+    console.log("Sending fetch...");
+    const res = await fetch(`${BACKEND_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    console.log("Response status:", res.status);
+    const data = await res.json();
+    console.log("Upload response:", data);
 
-      wavesurfer.current.load(data.url);
-      setFile(selectedFile.name);
+    wavesurfer.current.load(data.url);
+    setFile(selectedFile.name);
 
-      socket.emit("audio-loaded", {
-        room,
-        url: data.url,
-        filename: selectedFile.name,
-      });
-    } catch (err) {
-      alert("Upload failed. Please try again.");
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
-  };
+    socket.emit("audio-loaded", {
+      room,
+      url: data.url,
+      filename: selectedFile.name,
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("Upload failed: " + err.message);
+  } finally {
+    setUploading(false);
+  }
+};
 
   const handlePlay = () => {
     wavesurfer.current.play();
