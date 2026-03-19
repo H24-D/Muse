@@ -15,7 +15,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    resource_type: "video", // Cloudinary uses "video" for audio files too
+    resource_type: "video",
     folder: "muse-audio",
     format: "mp3",
   },
@@ -53,7 +53,6 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room ${roomId}`);
   });
 
-  // Broadcast audio URL to all room members
   socket.on("audio-loaded", ({ room, url, filename }) => {
     socket.to(room).emit("audio-loaded", { url, filename });
   });
