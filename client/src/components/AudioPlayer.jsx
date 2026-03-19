@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import socket from "../socket";
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
 export default function AudioPlayer({ room, name }) {
   const waveformRef = useRef();
   const wavesurfer = useRef();
   const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!waveformRef.current) return;
@@ -22,15 +25,48 @@ export default function AudioPlayer({ room, name }) {
     socket.on("pause", () => wavesurfer.current.pause());
     socket.on("seek", (time) => wavesurfer.current.seekTo(time));
 
+    // Load audio when another user uploads
+    socket.on("audio-loaded", ({ url, filename }) => {
+      wavesurfer.current.load(url);
+      setFile(filename);
+    });
+
     return () => wavesurfer.current.destroy();
   }, []);
 
-  const loadAudio = (e) => {
+  const loadAudio = async (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-    const url = URL.createObjectURL(selectedFile);
-    wavesurfer.current.load(url);
-    setFile(selectedFile.name);
+
+    setUploading(true);
+
+    // Upload to Cloudinary via backend
+    const formData = new FormData();
+    formData.append("audio", selectedFile);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      // Load in local WaveSurfer
+      wavesurfer.current.load(data.url);
+      setFile(selectedFile.name);
+
+      // Tell all room members to load this URL
+      socket.emit("audio-loaded", {
+        room,
+        url: data.url,
+        filename: selectedFile.name,
+      });
+    } catch (err) {
+      alert("Upload failed. Please try again.");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handlePlay = () => {
@@ -66,14 +102,20 @@ export default function AudioPlayer({ room, name }) {
           type="file"
           accept="audio/*"
           onChange={loadAudio}
+          disabled={uploading}
           className="block w-full text-sm text-gray-100 file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
             file:text-sm file:font-semibold
             file:bg-indigo-600 file:text-white
             hover:file:bg-indigo-700
-            cursor-pointer"
+            cursor-pointer disabled:opacity-50"
         />
-        {file && (
+        {uploading && (
+          <p className="text-sm mt-2 text-indigo-400 animate-pulse">
+            ⏫ Uploading to cloud…
+          </p>
+        )}
+        {file && !uploading && (
           <p className="text-sm mt-2 text-gray-400">
             Now playing: <span className="italic">{file}</span>
           </p>
