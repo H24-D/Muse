@@ -25,7 +25,6 @@ export default function AudioPlayer({ room, name }) {
     socket.on("pause", () => wavesurfer.current.pause());
     socket.on("seek", (time) => wavesurfer.current.seekTo(time));
 
-    // Load audio when another user uploads
     socket.on("audio-loaded", ({ url, filename }) => {
       wavesurfer.current.load(url);
       setFile(filename);
@@ -40,7 +39,6 @@ export default function AudioPlayer({ room, name }) {
 
     setUploading(true);
 
-    // Upload to Cloudinary via backend
     const formData = new FormData();
     formData.append("audio", selectedFile);
 
@@ -51,11 +49,9 @@ export default function AudioPlayer({ room, name }) {
       });
       const data = await res.json();
 
-      // Load in local WaveSurfer
       wavesurfer.current.load(data.url);
       setFile(selectedFile.name);
 
-      // Tell all room members to load this URL
       socket.emit("audio-loaded", {
         room,
         url: data.url,
