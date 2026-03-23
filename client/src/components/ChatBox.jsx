@@ -44,7 +44,6 @@ function ChatBox({ room, name }) {
     <div style={cardStyle}>
       <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "12px" }}>💬 Chat</div>
 
-      {/* Messages */}
       <div style={{
         background: "rgba(255,255,255,0.03)", borderRadius: "10px",
         padding: "10px", height: "140px", overflowY: "auto", marginBottom: "10px"
@@ -62,7 +61,6 @@ function ChatBox({ room, name }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input row */}
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         <input
           type="text"
@@ -87,15 +85,12 @@ function ChatBox({ room, name }) {
             borderRadius: "10px", fontSize: "16px", cursor: "pointer"
           }}
         >😊</button>
-        <button
-          onClick={sendMsg}
-          style={{
-            padding: "10px 14px", flexShrink: 0,
-            background: "#7c3aed", border: "1px solid #7c3aed",
-            borderRadius: "10px", color: "#fff",
-            fontSize: "13px", fontWeight: 600, cursor: "pointer"
-          }}
-        >Send</button>
+        <button onClick={sendMsg} style={{
+          padding: "10px 14px", flexShrink: 0,
+          background: "#7c3aed", border: "1px solid #7c3aed",
+          borderRadius: "10px", color: "#fff", WebkitTextFillColor: "#fff",
+          fontSize: "13px", fontWeight: 600, cursor: "pointer"
+        }}>Send</button>
       </div>
 
       {showPicker && (
