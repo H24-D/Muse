@@ -39,6 +39,20 @@ const roomState = {};
 const roomUsers = {};
 const roomSettings = {};
 
+const cleanupRoom = (roomId, userName, notify = true) => {
+  if (!roomUsers[roomId]) return;
+  const remaining = Object.keys(roomUsers[roomId]).length;
+  if (remaining === 0) {
+    delete roomUsers[roomId];
+    delete roomSettings[roomId];
+    delete roomState[roomId];
+    console.log(`Room ${roomId} cleaned up`);
+  } else if (notify) {
+    io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
+    io.to(roomId).emit("user-left", userName);
+  }
+};
+
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
@@ -79,6 +93,18 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("leave-room", (roomId) => {
+    const userName = socket.data.name;
+    socket.leave(roomId);
+    socket.data.room = null;
+    socket.data.name = null;
+
+    if (roomId && roomUsers[roomId]) {
+      delete roomUsers[roomId][socket.id];
+      cleanupRoom(roomId, userName, true);
+    }
+  });
+
   socket.on("audio-loaded", ({ room, url, filename }) => {
     if (!roomState[room]) roomState[room] = {};
     roomState[room].url = url;
@@ -111,17 +137,7 @@ io.on("connection", (socket) => {
     const userName = socket.data.name;
     if (roomId && roomUsers[roomId]) {
       delete roomUsers[roomId][socket.id];
-      const remaining = Object.keys(roomUsers[roomId]).length;
-
-      if (remaining === 0) {
-        delete roomUsers[roomId];
-        delete roomSettings[roomId];
-        delete roomState[roomId];
-        console.log(`Room ${roomId} is empty, cleaned up`);
-      } else {
-        io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
-        io.to(roomId).emit("user-left", userName);
-      }
+      cleanupRoom(roomId, userName, true);
     }
   });
 });
