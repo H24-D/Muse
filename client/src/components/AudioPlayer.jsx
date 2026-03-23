@@ -25,17 +25,25 @@ export default function AudioPlayer({ room, name }) {
     socket.off("pause");
     socket.off("seek");
     socket.off("audio-loaded");
+    socket.off("room-state");
 
     socket.on("play", () => wavesurfer.current?.play());
     socket.on("pause", () => wavesurfer.current?.pause());
     socket.on("seek", (progress) => wavesurfer.current?.seekTo(progress));
 
     socket.on("audio-loaded", ({ url, filename }) => {
-      console.log("📥 Received audio-loaded on this device:", url);
+      console.log("📥 audio-loaded received:", url);
+      wavesurfer.current.load(url);
+      setFile(filename);
+    });
+
+    socket.on("room-state", ({ url, filename, playing, progress }) => {
+      console.log("📦 Room state received:", url, "playing:", playing);
       wavesurfer.current.load(url);
       setFile(filename);
       wavesurfer.current.once("ready", () => {
-        console.log("✅ WaveSurfer ready");
+        if (progress) wavesurfer.current.seekTo(progress);
+        if (playing) wavesurfer.current.play();
       });
     });
 
@@ -44,6 +52,7 @@ export default function AudioPlayer({ room, name }) {
       socket.off("pause");
       socket.off("seek");
       socket.off("audio-loaded");
+      socket.off("room-state");
       wavesurfer.current?.destroy();
     };
   }, []);
@@ -53,7 +62,6 @@ export default function AudioPlayer({ room, name }) {
     if (!selectedFile) return;
 
     setUploading(true);
-    console.log("Starting upload to:", `${BACKEND_URL}/upload`);
 
     const formData = new FormData();
     formData.append("audio", selectedFile);
@@ -64,7 +72,6 @@ export default function AudioPlayer({ room, name }) {
         body: formData,
       });
       const data = await res.json();
-      console.log("Upload response:", data);
 
       wavesurfer.current.load(data.url);
       setFile(selectedFile.name);
