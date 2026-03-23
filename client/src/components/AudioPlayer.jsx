@@ -18,7 +18,6 @@ export default function AudioPlayer({ room, name }) {
   const [uploading, setUploading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (!waveformRef.current) return;
@@ -39,10 +38,6 @@ export default function AudioPlayer({ room, name }) {
       setDuration(wavesurfer.current.getDuration());
       setCurrentTime(0);
     });
-
-    wavesurfer.current.on("play", () => setIsPlaying(true));
-    wavesurfer.current.on("pause", () => setIsPlaying(false));
-    wavesurfer.current.on("finish", () => setIsPlaying(false));
 
     socket.off("play");
     socket.off("pause");
