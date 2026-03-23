@@ -81,99 +81,156 @@ function App() {
       {!joined ? (
         <RoomForm onJoin={handleJoin} error={joinError} />
       ) : (
-        <div style={{ maxWidth: "680px", margin: "0 auto", paddingBottom: "32px" }}>
+        <>
+          {/* ── MOBILE layout (< 1024px) ── */}
+          <div className="mobile-layout" style={{ maxWidth: "680px", margin: "0 auto", paddingBottom: "32px" }}>
 
-          {/* Topbar */}
-          <div style={{
-            background: "#0d0d1a", padding: "14px 16px",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            position: "sticky", top: 0, zIndex: 10
-          }}>
-            <div style={{ fontSize: "20px", fontWeight: 700, color: "#fff" }}>
-              🎶 <span style={{ color: "#a78bfa" }}>Muse</span>
-            </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <div style={{
-                background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)",
-                borderRadius: "8px", padding: "4px 10px",
-                fontSize: "12px", color: "#c4b5fd", fontFamily: "monospace"
-              }}>
-                {room}
+            <div style={{
+              background: "#0d0d1a", padding: "14px 16px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              position: "sticky", top: 0, zIndex: 10
+            }}>
+              <div style={{ fontSize: "20px", fontWeight: 700, color: "#fff" }}>
+                🎶 <span style={{ color: "#a78bfa" }}>Muse</span>
               </div>
-              <button onClick={handleLeave} style={{
-                background: "#7f1d1d", border: "1px solid #991b1b",
-                borderRadius: "8px", padding: "6px 12px",
-                color: "#fca5a5", fontSize: "12px", fontWeight: 600, cursor: "pointer"
-              }}>
-                🚪 Leave
-              </button>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <div style={{
+                  background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)",
+                  borderRadius: "8px", padding: "4px 10px",
+                  fontSize: "12px", color: "#c4b5fd", fontFamily: "monospace"
+                }}>{room}</div>
+                <button onClick={handleLeave} style={{
+                  background: "#7f1d1d", border: "1px solid #991b1b",
+                  borderRadius: "8px", padding: "6px 12px",
+                  color: "#fca5a5", fontSize: "12px", fontWeight: 600, cursor: "pointer"
+                }}>🚪 Leave</button>
+              </div>
             </div>
-          </div>
 
-          {/* Listeners */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            padding: "10px 16px", flexWrap: "wrap",
-            background: "rgba(255,255,255,0.02)",
-            borderBottom: "1px solid rgba(255,255,255,0.05)"
-          }}>
-            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>🎧 Listening:</span>
-            {roomUsers.map((u, i) => (
-              <span key={i} style={{
-                background: "#4c1d95", border: "1px solid #6d28d9",
-                borderRadius: "20px", padding: "3px 10px",
-                fontSize: "12px", color: "#c4b5fd"
-              }}>{u}</span>
-            ))}
-          </div>
-
-          {/* Audio Player */}
-          <div style={{ margin: "12px" }}>
-            <AudioPlayer room={room} name={name} />
-          </div>
-
-          {/* Chat */}
-          <div style={{ margin: "12px" }}>
-            <ChatBox room={room} name={name} />
-          </div>
-
-          {/* Share */}
-          <div style={{
-            margin: "12px",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "16px", padding: "14px"
-          }}>
-            <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "8px" }}>🔗 Share Room</div>
             <div style={{
               display: "flex", alignItems: "center", gap: "8px",
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: "10px", padding: "10px 12px"
+              padding: "10px 16px", flexWrap: "wrap",
+              background: "rgba(255,255,255,0.02)",
+              borderBottom: "1px solid rgba(255,255,255,0.05)"
             }}>
-              <span style={{
-                flex: 1, fontSize: "12px", color: "rgba(255,255,255,0.3)",
-                fontFamily: "monospace", overflow: "hidden",
-                textOverflow: "ellipsis", whiteSpace: "nowrap"
+              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>🎧 Listening:</span>
+              {roomUsers.map((u, i) => (
+                <span key={i} style={{
+                  background: "#4c1d95", border: "1px solid #6d28d9",
+                  borderRadius: "20px", padding: "3px 10px",
+                  fontSize: "12px", color: "#c4b5fd"
+                }}>{u}</span>
+              ))}
+            </div>
+
+            <div style={{ margin: "12px" }}><AudioPlayer room={room} name={name} /></div>
+            <div style={{ margin: "12px" }}><ChatBox room={room} name={name} /></div>
+
+            <div style={{
+              margin: "12px", background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px", padding: "14px"
+            }}>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "8px" }}>🔗 Share Room</div>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: "10px", padding: "10px 12px"
               }}>
-                {`${window.location.origin}/?room=${room}`}
-              </span>
-              <button
-                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
-                style={{
-                  padding: "6px 12px", background: "#4c1d95",
-                  border: "1px solid #6d28d9", borderRadius: "8px",
-                  color: "#c4b5fd", fontSize: "12px", fontWeight: 600,
-                  cursor: "pointer", flexShrink: 0
-                }}
-              >
-                📋 Copy
-              </button>
+                <span style={{
+                  flex: 1, fontSize: "12px", color: "rgba(255,255,255,0.3)",
+                  fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                }}>{`${window.location.origin}/?room=${room}`}</span>
+                <button
+                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
+                  style={{
+                    padding: "6px 12px", background: "#4c1d95", border: "1px solid #6d28d9",
+                    borderRadius: "8px", color: "#c4b5fd", fontSize: "12px",
+                    fontWeight: 600, cursor: "pointer", flexShrink: 0
+                  }}
+                >📋 Copy</button>
+              </div>
             </div>
           </div>
 
-        </div>
+          {/* ── DESKTOP layout (>= 1024px) ── */}
+          <div className="desktop-layout" style={{
+            minHeight: "100vh", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", padding: "48px 24px"
+          }}>
+            <div style={{
+              width: "100%", maxWidth: "1100px",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "20px", padding: "40px", gap: "32px",
+              display: "flex", flexDirection: "column"
+            }}>
+
+              {/* Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+                <div style={{ fontSize: "32px", fontWeight: 800, color: "#fff" }}>
+                  🎶 Welcome to <span style={{ color: "#a78bfa" }}>Muse</span>
+                </div>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <div style={{
+                    background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)",
+                    borderRadius: "10px", padding: "6px 14px",
+                    fontSize: "13px", color: "#c4b5fd", fontFamily: "monospace"
+                  }}>Room ID: <strong>{room}</strong></div>
+                  <button onClick={handleLeave} style={{
+                    background: "#7f1d1d", border: "1px solid #991b1b",
+                    borderRadius: "10px", padding: "8px 16px",
+                    color: "#fca5a5", fontSize: "13px", fontWeight: 600, cursor: "pointer"
+                  }}>🚪 Leave</button>
+                </div>
+              </div>
+
+              {/* Listeners */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.4)" }}>🎧 Listening:</span>
+                {roomUsers.map((u, i) => (
+                  <span key={i} style={{
+                    background: "#4c1d95", border: "1px solid #6d28d9",
+                    borderRadius: "20px", padding: "4px 12px",
+                    fontSize: "12px", color: "#c4b5fd"
+                  }}>{u}</span>
+                ))}
+              </div>
+
+              {/* 2-column grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+                <AudioPlayer room={room} name={name} />
+                <ChatBox room={room} name={name} />
+              </div>
+
+              {/* Share */}
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.5)", textAlign: "center", marginBottom: "12px" }}>
+                  🔗 Share this Room
+                </div>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "12px", padding: "14px 16px"
+                }}>
+                  <span style={{
+                    flex: 1, fontSize: "13px", color: "rgba(255,255,255,0.3)",
+                    fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                  }}>{`${window.location.origin}/?room=${room}`}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
+                    style={{
+                      padding: "8px 16px", background: "#4c1d95", border: "1px solid #6d28d9",
+                      borderRadius: "8px", color: "#c4b5fd", fontSize: "13px",
+                      fontWeight: 600, cursor: "pointer", flexShrink: 0
+                    }}
+                  >📋 Copy Link</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
