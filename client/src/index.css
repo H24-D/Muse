@@ -20,3 +20,11 @@ body {
   padding: 0;
   background: #0d0d1a;
 }
+
+.mobile-layout { display: block; }
+.desktop-layout { display: none; }
+
+@media (min-width: 1024px) {
+  .mobile-layout { display: none; }
+  .desktop-layout { display: flex; }
+}
