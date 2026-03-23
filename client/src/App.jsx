@@ -31,7 +31,10 @@ function App() {
   };
 
   useEffect(() => {
-    socket.on("room-users", (users) => setRoomUsers(users));
+    socket.on("room-users", (users) => {
+      setRoomUsers(users);
+      setJoined(true); // only join UI after server confirms
+    });
     socket.on("user-joined", (userName) => showToast(`${userName} joined the room 🎉`, "join"));
     socket.on("user-left", (userName) => showToast(`${userName} left the room 👋`, "leave"));
     socket.on("join-error", (msg) => {
@@ -52,11 +55,10 @@ function App() {
     setRoom(roomId);
     setName(userName);
     localStorage.setItem("userName", userName);
-    setJoined(true);
-    setTimeout(() => {
-      const emit = () => socket.emit("join", roomId, userName, password, maxUsers);
-      socket.connected ? emit() : socket.once("connect", emit);
-    }, 500);
+
+    // Don't set joined yet — wait for server confirmation via room-users event
+    const emit = () => socket.emit("join", roomId, userName, password, maxUsers);
+    socket.connected ? emit() : socket.once("connect", emit);
   };
 
   if (!serverReady) return <ServerWakeup onReady={handleServerReady} />;
