@@ -60,6 +60,7 @@ function App() {
   };
 
   const handleLeave = () => {
+    socket.emit("leave-room", room);
     setJoined(false);
     setRoom("");
     setName("");
