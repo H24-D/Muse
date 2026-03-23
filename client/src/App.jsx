@@ -5,48 +5,65 @@ import ChatBox from "./components/ChatBox";
 import ServerWakeup from "./components/ServerWakeup";
 import socket from "./socket";
 
+function Toast({ message, type }) {
+  return (
+    <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all
+      ${type === "join" ? "bg-green-600" : type === "leave" ? "bg-red-600" : "bg-yellow-600"}`}>
+      {message}
+    </div>
+  );
+}
+
 function App() {
   const [joined, setJoined] = useState(false);
   const [room, setRoom] = useState("");
   const [name, setName] = useState("");
   const [serverReady, setServerReady] = useState(false);
   const [roomUsers, setRoomUsers] = useState([]);
+  const [toast, setToast] = useState(null);
+  const [joinError, setJoinError] = useState("");
 
-  const handleServerReady = useCallback(() => {
-    setServerReady(true);
-  }, []);
+  const handleServerReady = useCallback(() => setServerReady(true), []);
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
-    socket.on("room-users", (users) => {
-      setRoomUsers(users);
-    });
-    return () => socket.off("room-users");
+    socket.on("room-users", (users) => setRoomUsers(users));
+    socket.on("user-joined", (userName) => showToast(`${userName} joined the room 🎉`, "join"));
+    socket.on("user-left", (userName) => showToast(`${userName} left the room 👋`, "leave"));
+    socket.on("join-error", (msg) => setJoinError(msg));
+
+    return () => {
+      socket.off("room-users");
+      socket.off("user-joined");
+      socket.off("user-left");
+      socket.off("join-error");
+    };
   }, []);
 
-  const handleJoin = (roomId, userName) => {
+  const handleJoin = (roomId, userName, password, maxUsers) => {
+    setJoinError("");
     setRoom(roomId);
     setName(userName);
     localStorage.setItem("userName", userName);
     setJoined(true);
     setTimeout(() => {
-      if (socket.connected) {
-        socket.emit("join", roomId, userName);
-      } else {
-        socket.once("connect", () => {
-          socket.emit("join", roomId, userName);
-        });
-      }
+      const emit = () => socket.emit("join", roomId, userName, password, maxUsers);
+      socket.connected ? emit() : socket.once("connect", emit);
     }, 500);
   };
 
-  if (!serverReady) {
-    return <ServerWakeup onReady={handleServerReady} />;
-  }
+  if (!serverReady) return <ServerWakeup onReady={handleServerReady} />;
 
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} />}
+
       {!joined ? (
-        <RoomForm onJoin={handleJoin} />
+        <RoomForm onJoin={handleJoin} error={joinError} />
       ) : (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center px-6 py-12">
           <div className="w-full max-w-6xl bg-gray-900 text-white rounded-xl shadow-xl border border-gray-700 p-10 space-y-12">
@@ -75,19 +92,13 @@ function App() {
             </div>
 
             <div className="text-center mt-10">
-              <p className="text-md font-semibold mb-3 text-gray-300">
-                🔗 Share this Room
-              </p>
+              <p className="text-md font-semibold mb-3 text-gray-300">🔗 Share this Room</p>
               <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap shadow-sm">
                 <span className="text-sm font-mono break-all text-gray-400">
                   {`${window.location.origin}/?room=${room}`}
                 </span>
                 <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      `${window.location.origin}/?room=${room}`
-                    )
-                  }
+                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
                 >
                   📋 Copy Link
