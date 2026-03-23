@@ -34,7 +34,10 @@ function App() {
     socket.on("room-users", (users) => setRoomUsers(users));
     socket.on("user-joined", (userName) => showToast(`${userName} joined the room 🎉`, "join"));
     socket.on("user-left", (userName) => showToast(`${userName} left the room 👋`, "leave"));
-    socket.on("join-error", (msg) => setJoinError(msg));
+    socket.on("join-error", (msg) => {
+      setJoinError(msg);
+      setJoined(false);
+    });
 
     return () => {
       socket.off("room-users");
