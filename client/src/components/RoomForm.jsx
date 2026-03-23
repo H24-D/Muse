@@ -9,22 +9,27 @@ export default function RoomForm({ onJoin, error }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [maxUsers, setMaxUsers] = useState("");
+  const [errors, setErrors] = useState({});
 
   const generateRoom = () => setRoom(uuidv4().slice(0, 6));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!room || !name) return;
+    const newErrors = {};
+    if (!room.trim()) newErrors.room = "⚠️ Please enter a Room ID";
+    if (!name.trim()) newErrors.name = "⚠️ Please enter your name";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
     onJoin(room, name, password, maxUsers ? parseInt(maxUsers) : null);
   };
 
   return (
     <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2rem 1rem",
+      minHeight: "100vh", display: "flex", alignItems: "center",
+      justifyContent: "center", padding: "2rem 1rem",
       background: "radial-gradient(ellipse at 20% 50%, #1a0533 0%, #0d0d1a 40%, #0a1628 100%)"
     }}>
       <div style={{ width: "100%", maxWidth: "480px" }}>
@@ -53,8 +58,7 @@ export default function RoomForm({ onJoin, error }) {
         <form onSubmit={handleSubmit} style={{
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "24px",
-          padding: "2rem"
+          borderRadius: "24px", padding: "2rem"
         }}>
 
           {/* Room ID */}
@@ -66,32 +70,27 @@ export default function RoomForm({ onJoin, error }) {
               <input
                 type="text"
                 value={room}
-                onChange={(e) => setRoom(e.target.value)}
+                onChange={(e) => { setRoom(e.target.value); setErrors((p) => ({ ...p, room: null })); }}
                 placeholder="Enter room code"
                 style={{
                   flex: 1, padding: "13px 16px",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: errors.room ? "rgba(239,68,68,0.1)" : "rgba(255,255,255,0.06)",
+                  border: `1px solid ${errors.room ? "#ef4444" : "rgba(255,255,255,0.1)"}`,
                   borderRadius: "12px 0 0 12px",
-                  color: "#ffffff", fontSize: "14px", outline: "none"
+                  color: "#ffffff", fontSize: "14px", outline: "none", boxSizing: "border-box"
                 }}
               />
-              <button
-                type="button"
-                onClick={generateRoom}
-                style={{
-                  padding: "13px 16px",
-                  background: "rgba(124,58,237,0.3)",
-                  border: "1px solid rgba(124,58,237,0.4)",
-                  borderLeft: "none",
-                  borderRadius: "0 12px 12px 0",
-                  color: "#ffffff",
-                  fontSize: "15px", cursor: "pointer"
-                }}
-              >
-                🎲
-              </button>
+              <button type="button" onClick={generateRoom} style={{
+                padding: "13px 16px",
+                background: "rgba(124,58,237,0.3)",
+                border: "1px solid rgba(124,58,237,0.4)", borderLeft: "none",
+                borderRadius: "0 12px 12px 0",
+                color: "#ffffff", fontSize: "15px", cursor: "pointer"
+              }}>🎲</button>
             </div>
+            {errors.room && (
+              <p style={{ color: "#f87171", fontSize: "12px", marginTop: "6px" }}>{errors.room}</p>
+            )}
           </div>
 
           {/* Your Name */}
@@ -102,17 +101,19 @@ export default function RoomForm({ onJoin, error }) {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); setErrors((p) => ({ ...p, name: null })); }}
               placeholder="Who's listening?"
               style={{
                 width: "100%", padding: "13px 16px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                color: "#ffffff", fontSize: "14px", outline: "none",
-                boxSizing: "border-box"
+                background: errors.name ? "rgba(239,68,68,0.1)" : "rgba(255,255,255,0.06)",
+                border: `1px solid ${errors.name ? "#ef4444" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: "12px", color: "#ffffff", fontSize: "14px",
+                outline: "none", boxSizing: "border-box"
               }}
             />
+            {errors.name && (
+              <p style={{ color: "#f87171", fontSize: "12px", marginTop: "6px" }}>{errors.name}</p>
+            )}
           </div>
 
           {/* Divider */}
@@ -137,9 +138,8 @@ export default function RoomForm({ onJoin, error }) {
                   width: "100%", padding: "13px 16px",
                   background: "rgba(255,255,255,0.06)",
                   border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "12px",
-                  color: "#ffffff", fontSize: "14px", outline: "none",
-                  boxSizing: "border-box"
+                  borderRadius: "12px", color: "#ffffff",
+                  fontSize: "14px", outline: "none", boxSizing: "border-box"
                 }}
               />
             </div>
@@ -149,8 +149,7 @@ export default function RoomForm({ onJoin, error }) {
               </label>
               <input
                 type="number"
-                min="2"
-                max="20"
+                min="2" max="20"
                 value={maxUsers}
                 onChange={(e) => setMaxUsers(e.target.value)}
                 placeholder="No limit"
@@ -158,15 +157,14 @@ export default function RoomForm({ onJoin, error }) {
                   width: "100%", padding: "13px 16px",
                   background: "rgba(255,255,255,0.06)",
                   border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "12px",
-                  color: "#ffffff", fontSize: "14px", outline: "none",
-                  boxSizing: "border-box"
+                  borderRadius: "12px", color: "#ffffff",
+                  fontSize: "14px", outline: "none", boxSizing: "border-box"
                 }}
               />
             </div>
           </div>
 
-          {/* Error */}
+          {/* Server error */}
           {error && (
             <p style={{ color: "#f87171", fontSize: "13px", textAlign: "center", marginTop: "1rem" }}>{error}</p>
           )}
@@ -176,35 +174,26 @@ export default function RoomForm({ onJoin, error }) {
             <button
               type="button"
               onClick={() => {
-                if (!room || !name) return;
+                const newErrors = {};
+                if (!room.trim()) newErrors.room = "⚠️ Please enter a Room ID";
+                if (!name.trim()) newErrors.name = "⚠️ Please enter your name";
+                if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+                setErrors({});
                 onJoin(room, name, password, maxUsers ? parseInt(maxUsers) : null);
               }}
               style={{
-                padding: "14px",
-                background: "transparent",
-                border: "2px solid rgba(255,255,255,0.5)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                WebkitTextFillColor: "#ffffff",
+                padding: "14px", background: "transparent",
+                border: "2px solid rgba(255,255,255,0.5)", borderRadius: "12px",
+                color: "#ffffff", WebkitTextFillColor: "#ffffff",
                 fontSize: "14px", fontWeight: 600, cursor: "pointer"
               }}
-            >
-              Create Room
-            </button>
-            <button
-              type="submit"
-              style={{
-                padding: "14px",
-                background: "#7c3aed",
-                border: "2px solid #7c3aed",
-                borderRadius: "12px",
-                color: "#ffffff",
-                WebkitTextFillColor: "#ffffff",
-                fontSize: "14px", fontWeight: 600, cursor: "pointer"
-              }}
-            >
-              Join Room →
-            </button>
+            >Create Room</button>
+            <button type="submit" style={{
+              padding: "14px", background: "#7c3aed",
+              border: "2px solid #7c3aed", borderRadius: "12px",
+              color: "#ffffff", WebkitTextFillColor: "#ffffff",
+              fontSize: "14px", fontWeight: 600, cursor: "pointer"
+            }}>Join Room →</button>
           </div>
         </form>
 
