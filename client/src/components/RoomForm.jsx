@@ -2,7 +2,10 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export default function RoomForm({ onJoin }) {
-  const [room, setRoom] = useState("");
+  const params = new URLSearchParams(window.location.search);
+  const roomFromUrl = params.get("room") || "";
+
+  const [room, setRoom] = useState(roomFromUrl);
   const [name, setName] = useState("");
 
   const generateRoom = () => setRoom(uuidv4().slice(0, 6));
@@ -18,7 +21,6 @@ export default function RoomForm({ onJoin }) {
       <h1 className="text-5xl font-extrabold mb-10 tracking-wide drop-shadow-lg">
         🎵 Muse
       </h1>
-
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 space-y-6"
@@ -42,7 +44,6 @@ export default function RoomForm({ onJoin }) {
             </button>
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-semibold mb-2">Your Name</label>
           <input
@@ -53,7 +54,6 @@ export default function RoomForm({ onJoin }) {
             placeholder="Enter your name"
           />
         </div>
-
         <button
           type="submit"
           className="w-full bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 text-white font-bold py-3 rounded-lg shadow-md hover:scale-105 transition transform duration-300"
