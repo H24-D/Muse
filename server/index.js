@@ -37,28 +37,29 @@ app.post("/upload", upload.single("audio"), (req, res) => {
 
 const roomState = {};
 const roomUsers = {};
-const roomSettings = {}; // password + maxUsers per room
+const roomSettings = {};
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   socket.on("join", (roomId, userName, password, maxUsers) => {
-    // Init room settings on first join
-    if (!roomSettings[roomId]) {
-      roomSettings[roomId] = { password: password || null, maxUsers: maxUsers || null };
-    }
+    const isNewRoom = !roomSettings[roomId];
 
-    // Check password
-    if (roomSettings[roomId].password && roomSettings[roomId].password !== password) {
-      socket.emit("join-error", "❌ Wrong password!");
-      return;
-    }
-
-    // Check max users
-    const currentUsers = Object.keys(roomUsers[roomId] || {}).length;
-    if (roomSettings[roomId].maxUsers && currentUsers >= roomSettings[roomId].maxUsers) {
-      socket.emit("join-error", "❌ Room is full!");
-      return;
+    if (isNewRoom) {
+      roomSettings[roomId] = {
+        password: password || null,
+        maxUsers: maxUsers || null,
+      };
+    } else {
+      if (roomSettings[roomId].password && roomSettings[roomId].password !== password) {
+        socket.emit("join-error", "❌ Wrong password!");
+        return;
+      }
+      const currentUsers = Object.keys(roomUsers[roomId] || {}).length;
+      if (roomSettings[roomId].maxUsers && currentUsers >= roomSettings[roomId].maxUsers) {
+        socket.emit("join-error", "❌ Room is full!");
+        return;
+      }
     }
 
     socket.join(roomId);
@@ -68,13 +69,9 @@ io.on("connection", (socket) => {
     if (!roomUsers[roomId]) roomUsers[roomId] = {};
     roomUsers[roomId][socket.id] = userName;
 
-    // Notify others someone joined
     socket.to(roomId).emit("user-joined", userName);
-
-    // Send updated user list to everyone
     io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
 
-    // Send existing room state to new joiner
     if (roomState[roomId]) {
       socket.emit("room-state", roomState[roomId]);
     }
