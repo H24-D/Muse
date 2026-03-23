@@ -17,28 +17,41 @@ function App() {
 
   // Auto-join if room is in URL and name is saved
   useEffect(() => {
-    if (!serverReady) return;
-    const params = new URLSearchParams(window.location.search);
-    const roomFromUrl = params.get("room");
-
-    if (roomFromUrl) {
-      setRoom(roomFromUrl);
-      const savedName = localStorage.getItem("userName");
-      if (savedName) {
-        setName(savedName);
+  if (!serverReady) return;
+  const params = new URLSearchParams(window.location.search);
+  const roomFromUrl = params.get("room");
+  if (roomFromUrl) {
+    setRoom(roomFromUrl);
+    const savedName = localStorage.getItem("userName");
+    if (savedName) {
+      setName(savedName);
+      if (socket.connected) {
         socket.emit("join", roomFromUrl);
         setJoined(true);
+      } else {
+        socket.once("connect", () => {
+          socket.emit("join", roomFromUrl);
+          setJoined(true);
+        });
       }
     }
-  }, [serverReady]);
+  }
+}, [serverReady]);
 
   const handleJoin = (roomId, userName) => {
-    setRoom(roomId);
-    setName(userName);
-    localStorage.setItem("userName", userName);
+  setRoom(roomId);
+  setName(userName);
+  localStorage.setItem("userName", userName);
+  if (socket.connected) {
     socket.emit("join", roomId);
     setJoined(true);
-  };
+  } else {
+    socket.once("connect", () => {
+      socket.emit("join", roomId);
+      setJoined(true);
+    });
+  }
+};
 
   // Show loading screen until backend is reachable
   if (!serverReady) {
