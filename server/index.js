@@ -45,16 +45,23 @@ app.post("/upload", upload.single("audio"), (req, res) => {
   res.json({ url: req.file.path, filename: req.file.originalname });
 });
 
+const roomAudio = {};
+
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   socket.on("join", (roomId) => {
     socket.join(roomId);
     console.log("User", socket.id, "joined room", roomId);
+    if (roomAudio[roomId]) {
+      console.log("Sending existing audio to new joiner:", roomAudio[roomId].url);
+      socket.emit("audio-loaded", roomAudio[roomId]);
+    }
   });
 
   socket.on("audio-loaded", ({ room, url, filename }) => {
     console.log("Audio loaded in room", room, url);
+    roomAudio[room] = { url, filename };
     socket.to(room).emit("audio-loaded", { url, filename });
   });
 
