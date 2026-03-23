@@ -45,7 +45,7 @@ app.post("/upload", upload.single("audio"), (req, res) => {
   res.json({ url: req.file.path, filename: req.file.originalname });
 });
 
-const roomAudio = {};
+const roomState = {}; // stores audio + play state per room
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
@@ -53,21 +53,36 @@ io.on("connection", (socket) => {
   socket.on("join", (roomId) => {
     socket.join(roomId);
     console.log("User", socket.id, "joined room", roomId);
-    if (roomAudio[roomId]) {
-      console.log("Sending existing audio to new joiner:", roomAudio[roomId].url);
-      socket.emit("audio-loaded", roomAudio[roomId]);
+    if (roomState[roomId]) {
+      socket.emit("room-state", roomState[roomId]);
     }
   });
 
   socket.on("audio-loaded", ({ room, url, filename }) => {
     console.log("Audio loaded in room", room, url);
-    roomAudio[room] = { url, filename };
+    if (!roomState[room]) roomState[room] = {};
+    roomState[room].url = url;
+    roomState[room].filename = filename;
+    roomState[room].playing = false;
+    roomState[room].progress = 0;
     socket.to(room).emit("audio-loaded", { url, filename });
   });
 
-  socket.on("play", (roomId) => socket.to(roomId).emit("play"));
-  socket.on("pause", (roomId) => socket.to(roomId).emit("pause"));
-  socket.on("seek", ({ room, progress }) => socket.to(room).emit("seek", progress));
+  socket.on("play", (roomId) => {
+    if (roomState[roomId]) roomState[roomId].playing = true;
+    socket.to(roomId).emit("play");
+  });
+
+  socket.on("pause", (roomId) => {
+    if (roomState[roomId]) roomState[roomId].playing = false;
+    socket.to(roomId).emit("pause");
+  });
+
+  socket.on("seek", ({ room, progress }) => {
+    if (roomState[room]) roomState[room].progress = progress;
+    socket.to(room).emit("seek", progress);
+  });
+
   socket.on("chat", ({ room, name, msg }) => io.to(room).emit("chat", { name, msg }));
 
   socket.on("disconnect", () => {
