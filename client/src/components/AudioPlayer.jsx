@@ -11,6 +11,12 @@ const formatTime = (seconds) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
+const cardStyle = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "16px", padding: "14px"
+};
+
 export default function AudioPlayer({ room, name }) {
   const waveformRef = useRef();
   const wavesurfer = useRef();
@@ -24,16 +30,13 @@ export default function AudioPlayer({ room, name }) {
 
     wavesurfer.current = WaveSurfer.create({
       container: waveformRef.current,
-      waveColor: "#6366f1",
-      progressColor: "#8b5cf6",
-      height: 80,
+      waveColor: "#6d28d9",
+      progressColor: "#a78bfa",
+      height: 60,
       responsive: true,
     });
 
-    wavesurfer.current.on("audioprocess", () => {
-      setCurrentTime(wavesurfer.current.getCurrentTime());
-    });
-
+    wavesurfer.current.on("audioprocess", () => setCurrentTime(wavesurfer.current.getCurrentTime()));
     wavesurfer.current.on("ready", () => {
       setDuration(wavesurfer.current.getDuration());
       setCurrentTime(0);
@@ -48,12 +51,10 @@ export default function AudioPlayer({ room, name }) {
     socket.on("play", () => wavesurfer.current?.play());
     socket.on("pause", () => wavesurfer.current?.pause());
     socket.on("seek", (progress) => wavesurfer.current?.seekTo(progress));
-
     socket.on("audio-loaded", ({ url, filename }) => {
       wavesurfer.current.load(url);
       setFile(filename);
     });
-
     socket.on("room-state", ({ url, filename, playing, progress }) => {
       wavesurfer.current.load(url);
       setFile(filename);
@@ -93,16 +94,8 @@ export default function AudioPlayer({ room, name }) {
     }
   };
 
-  const handlePlay = () => {
-    wavesurfer.current?.play();
-    socket.emit("play", room);
-  };
-
-  const handlePause = () => {
-    wavesurfer.current?.pause();
-    socket.emit("pause", room);
-  };
-
+  const handlePlay = () => { wavesurfer.current?.play(); socket.emit("play", room); };
+  const handlePause = () => { wavesurfer.current?.pause(); socket.emit("pause", room); };
   const handleSeek = () => {
     const progress = wavesurfer.current.getCurrentTime() / wavesurfer.current.getDuration();
     socket.emit("seek", { room, progress });
@@ -111,73 +104,49 @@ export default function AudioPlayer({ room, name }) {
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-6 text-white space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-indigo-400">🎧 Audio Player</h2>
-        <div className="text-sm bg-gray-700 text-indigo-300 px-3 py-1 rounded font-mono">
-          Room: <span className="font-semibold">{room}</span>
-        </div>
-      </div>
+    <div style={cardStyle}>
+      <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "12px" }}>🎧 Audio Player</div>
 
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-300">
-          Upload Audio File
-        </label>
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={loadAudio}
-          disabled={uploading}
-          className="block w-full text-sm text-gray-100 file:mr-4 file:py-2 file:px-4
-            file:rounded-full file:border-0 file:text-sm file:font-semibold
-            file:bg-indigo-600 file:text-white hover:file:bg-indigo-700
-            cursor-pointer disabled:opacity-50"
-        />
-        {uploading && (
-          <p className="text-sm mt-2 text-indigo-400 animate-pulse">⏫ Uploading to cloud…</p>
-        )}
-        {file && !uploading && (
-          <p className="text-sm mt-2 text-gray-400">
-            Now playing: <span className="italic">{file}</span>
-          </p>
-        )}
-      </div>
+      {/* Upload */}
+      <label style={{
+        display: "block", width: "100%", padding: "10px",
+        background: "rgba(124,58,237,0.2)", border: "1px dashed rgba(124,58,237,0.5)",
+        borderRadius: "10px", color: "#c4b5fd", fontSize: "13px",
+        textAlign: "center", cursor: "pointer", marginBottom: "10px",
+        boxSizing: "border-box"
+      }}>
+        {uploading ? "⏫ Uploading..." : file ? `🎵 ${file}` : "+ Choose Audio File"}
+        <input type="file" accept="audio/*" onChange={loadAudio} disabled={uploading} style={{ display: "none" }} />
+      </label>
 
+      {/* Waveform */}
       <div
         ref={waveformRef}
-        className="bg-gray-700 rounded h-24 cursor-pointer"
         onClick={handleSeek}
+        style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", cursor: "pointer", marginBottom: "8px" }}
       />
 
-      {/* Progress bar + timestamp */}
-      <div className="space-y-1">
-        <div className="w-full bg-gray-700 rounded-full h-1.5">
-          <div
-            className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-gray-400 font-mono">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
-        </div>
+      {/* Progress bar */}
+      <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "4px", height: "3px", marginBottom: "4px" }}>
+        <div style={{ background: "#a78bfa", borderRadius: "4px", height: "3px", width: `${progress}%`, transition: "width 0.3s" }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace", marginBottom: "12px" }}>
+        <span>{formatTime(currentTime)}</span>
+        <span>{formatTime(duration)}</span>
       </div>
 
-      <div className="flex space-x-4 justify-center mt-4">
-        <button
-          onClick={handlePlay}
-          disabled={!file}
-          className="bg-green-500 hover:bg-green-600 transition px-5 py-2 rounded text-white font-semibold shadow disabled:opacity-40"
-        >
-          ▶ Play
-        </button>
-        <button
-          onClick={handlePause}
-          disabled={!file}
-          className="bg-red-500 hover:bg-red-600 transition px-5 py-2 rounded text-white font-semibold shadow disabled:opacity-40"
-        >
-          ⏸ Pause
-        </button>
+      {/* Controls */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+        <button onClick={handlePlay} disabled={!file} style={{
+          padding: "10px", background: "#065f46", border: "1px solid #059669",
+          borderRadius: "10px", color: "#6ee7b7", fontSize: "13px",
+          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4
+        }}>▶ Play</button>
+        <button onClick={handlePause} disabled={!file} style={{
+          padding: "10px", background: "#7f1d1d", border: "1px solid #991b1b",
+          borderRadius: "10px", color: "#fca5a5", fontSize: "13px",
+          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4
+        }}>⏸ Pause</button>
       </div>
     </div>
   );
