@@ -10,50 +10,58 @@ function App() {
   const [room, setRoom] = useState("");
   const [name, setName] = useState("");
   const [serverReady, setServerReady] = useState(false);
+  const [roomUsers, setRoomUsers] = useState([]);
 
   const handleServerReady = useCallback(() => {
     setServerReady(true);
   }, []);
 
-  // Auto-join if room is in URL and name is saved
   useEffect(() => {
-  if (!serverReady) return;
-  const params = new URLSearchParams(window.location.search);
-  const roomFromUrl = params.get("room");
-  if (roomFromUrl) {
-    setRoom(roomFromUrl);
-    const savedName = localStorage.getItem("userName");
-    if (savedName) {
-      setName(savedName);
-      if (socket.connected) {
-        socket.emit("join", roomFromUrl);
+    socket.on("room-users", (users) => {
+      setRoomUsers(users);
+    });
+    return () => socket.off("room-users");
+  }, []);
+
+  useEffect(() => {
+    if (!serverReady) return;
+    const params = new URLSearchParams(window.location.search);
+    const roomFromUrl = params.get("room");
+    if (roomFromUrl) {
+      setRoom(roomFromUrl);
+      const savedName = localStorage.getItem("userName");
+      if (savedName) {
+        setName(savedName);
         setJoined(true);
-      } else {
-        socket.once("connect", () => {
-          socket.emit("join", roomFromUrl);
-          setJoined(true);
-        });
+        setTimeout(() => {
+          if (socket.connected) {
+            socket.emit("join", roomFromUrl, savedName);
+          } else {
+            socket.once("connect", () => {
+              socket.emit("join", roomFromUrl, savedName);
+            });
+          }
+        }, 500);
       }
     }
-  }
-}, [serverReady]);
+  }, [serverReady]);
 
   const handleJoin = (roomId, userName) => {
-  setRoom(roomId);
-  setName(userName);
-  localStorage.setItem("userName", userName);
-  if (socket.connected) {
-    socket.emit("join", roomId);
+    setRoom(roomId);
+    setName(userName);
+    localStorage.setItem("userName", userName);
     setJoined(true);
-  } else {
-    socket.once("connect", () => {
-      socket.emit("join", roomId);
-      setJoined(true);
-    });
-  }
-};
+    setTimeout(() => {
+      if (socket.connected) {
+        socket.emit("join", roomId, userName);
+      } else {
+        socket.once("connect", () => {
+          socket.emit("join", roomId, userName);
+        });
+      }
+    }, 500);
+  };
 
-  // Show loading screen until backend is reachable
   if (!serverReady) {
     return <ServerWakeup onReady={handleServerReady} />;
   }
@@ -69,11 +77,19 @@ function App() {
               <h2 className="text-4xl font-bold text-center text-white">
                 🎶 Welcome to <span className="text-indigo-400">Muse</span>
               </h2>
-
-              {/* Room Badge */}
               <div className="bg-gray-800 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500 font-mono text-sm shadow">
                 Room ID: <span className="font-semibold">{room}</span>
               </div>
+            </div>
+
+            {/* Who's in the room */}
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-gray-400">🎧 Listening:</span>
+              {roomUsers.map((u, i) => (
+                <span key={i} className="bg-indigo-700 text-white text-xs px-3 py-1 rounded-full font-medium">
+                  {u}
+                </span>
+              ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
