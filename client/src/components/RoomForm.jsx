@@ -19,84 +19,199 @@ export default function RoomForm({ onJoin, error }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4">
-      <h1 className="text-5xl font-extrabold mb-10 tracking-wide drop-shadow-lg">
-        🎵 Muse
-      </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 space-y-5"
-      >
-        <div>
-          <label className="block text-sm font-semibold mb-2">Room ID</label>
-          <div className="flex">
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem 1rem",
+      background: "radial-gradient(ellipse at 20% 50%, #1a0533 0%, #0d0d1a 40%, #0a1628 100%)"
+    }}>
+      <div style={{ width: "100%", maxWidth: "480px" }}>
+
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{
+            width: "56px", height: "56px",
+            background: "rgba(124,58,237,0.2)",
+            border: "1px solid rgba(124,58,237,0.4)",
+            borderRadius: "16px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 1rem"
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M9 18V5l12-2v13" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="6" cy="18" r="3" stroke="#ffffff" strokeWidth="2"/>
+              <circle cx="18" cy="16" r="3" stroke="#ffffff" strokeWidth="2"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: "36px", fontWeight: 800, color: "#ffffff", letterSpacing: "-1px" }}>Muse</div>
+          <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>Listen together, in sync</div>
+        </div>
+
+        {/* Card */}
+        <form onSubmit={handleSubmit} style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "24px",
+          padding: "2rem"
+        }}>
+
+          {/* Room ID */}
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "#ffffff", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "8px" }}>
+              Room ID
+            </label>
+            <div style={{ display: "flex" }}>
+              <input
+                type="text"
+                value={room}
+                onChange={(e) => setRoom(e.target.value)}
+                placeholder="Enter room code"
+                style={{
+                  flex: 1, padding: "13px 16px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "12px 0 0 12px",
+                  color: "#ffffff", fontSize: "14px", outline: "none"
+                }}
+              />
+              <button
+                type="button"
+                onClick={generateRoom}
+                style={{
+                  padding: "13px 16px",
+                  background: "rgba(124,58,237,0.3)",
+                  border: "1px solid rgba(124,58,237,0.4)",
+                  borderLeft: "none",
+                  borderRadius: "0 12px 12px 0",
+                  color: "#ffffff",
+                  fontSize: "15px", cursor: "pointer"
+                }}
+              >
+                🎲
+              </button>
+            </div>
+          </div>
+
+          {/* Your Name */}
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "#ffffff", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "8px" }}>
+              Your Name
+            </label>
             <input
               type="text"
-              value={room}
-              onChange={(e) => setRoom(e.target.value)}
-              className="flex-grow px-4 py-2 rounded-l-md text-white bg-gradient-to-br from-purple-700 to-indigo-700 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-300"
-              placeholder="Enter room code"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Who's listening?"
+              style={{
+                width: "100%", padding: "13px 16px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px",
+                color: "#ffffff", fontSize: "14px", outline: "none",
+                boxSizing: "border-box"
+              }}
             />
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "1.25rem 0" }}>
+            <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.07)" }} />
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", letterSpacing: "1.5px" }}>OPTIONAL</div>
+            <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.07)" }} />
+          </div>
+
+          {/* Password + Max Users */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "#ffffff", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "8px" }}>
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Leave blank"
+                style={{
+                  width: "100%", padding: "13px 16px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "12px",
+                  color: "#ffffff", fontSize: "14px", outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: 500, color: "#ffffff", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "8px" }}>
+                Max Users
+              </label>
+              <input
+                type="number"
+                min="2"
+                max="20"
+                value={maxUsers}
+                onChange={(e) => setMaxUsers(e.target.value)}
+                placeholder="No limit"
+                style={{
+                  width: "100%", padding: "13px 16px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "12px",
+                  color: "#ffffff", fontSize: "14px", outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p style={{ color: "#f87171", fontSize: "13px", textAlign: "center", marginTop: "1rem" }}>{error}</p>
+          )}
+
+          {/* Buttons */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "1.5rem" }}>
             <button
               type="button"
-              onClick={generateRoom}
-              className="bg-gradient-to-br from-pink-400 to-pink-600 text-white px-4 py-2 rounded-r-md font-bold hover:brightness-110 transition"
+              onClick={() => {
+                if (!room || !name) return;
+                onJoin(room, name, password, maxUsers ? parseInt(maxUsers) : null);
+              }}
+              style={{
+                padding: "14px",
+                background: "transparent",
+                border: "2px solid rgba(255,255,255,0.5)",
+                borderRadius: "12px",
+                color: "#ffffff",
+                WebkitTextFillColor: "#ffffff",
+                fontSize: "14px", fontWeight: 600, cursor: "pointer"
+              }}
             >
-              🎲
+              Create Room
+            </button>
+            <button
+              type="submit"
+              style={{
+                padding: "14px",
+                background: "#7c3aed",
+                border: "2px solid #7c3aed",
+                borderRadius: "12px",
+                color: "#ffffff",
+                WebkitTextFillColor: "#ffffff",
+                fontSize: "14px", fontWeight: 600, cursor: "pointer"
+              }}
+            >
+              Join Room →
             </button>
           </div>
-        </div>
+        </form>
 
-        <div>
-          <label className="block text-sm font-semibold mb-2">Your Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            placeholder="Enter your name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2">
-            🔒 Room Password <span className="text-white/50 font-normal">(optional)</span>
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            placeholder="Leave blank for no password"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2">
-            👥 Max Users <span className="text-white/50 font-normal">(optional)</span>
-          </label>
-          <input
-            type="number"
-            min="2"
-            max="20"
-            value={maxUsers}
-            onChange={(e) => setMaxUsers(e.target.value)}
-            className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            placeholder="No limit"
-          />
-        </div>
-
-        {error && (
-          <p className="text-red-400 text-sm text-center font-medium">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 text-white font-bold py-3 rounded-lg shadow-md hover:scale-105 transition transform duration-300"
-        >
-          🚀 Join Room
-        </button>
-      </form>
+        <p style={{ textAlign: "center", fontSize: "12px", color: "rgba(255,255,255,0.2)", marginTop: "1.25rem" }}>
+          Rooms are cleared when everyone leaves
+        </p>
+      </div>
     </div>
   );
 }
