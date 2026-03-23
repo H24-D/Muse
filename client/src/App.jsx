@@ -81,7 +81,7 @@ function App() {
       {!joined ? (
         <RoomForm onJoin={handleJoin} error={joinError} />
       ) : (
-        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "0 0 32px" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto", paddingBottom: "32px" }}>
 
           {/* Topbar */}
           <div style={{
