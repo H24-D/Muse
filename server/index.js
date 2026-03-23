@@ -72,8 +72,11 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("user-joined", userName);
     io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
 
+    // Send room-state after a short delay so WaveSurfer has time to initialize
     if (roomState[roomId]) {
-      socket.emit("room-state", roomState[roomId]);
+      setTimeout(() => {
+        socket.emit("room-state", roomState[roomId]);
+      }, 600);
     }
   });
 
