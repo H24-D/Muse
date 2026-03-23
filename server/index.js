@@ -45,14 +45,21 @@ app.post("/upload", upload.single("audio"), (req, res) => {
   res.json({ url: req.file.path, filename: req.file.originalname });
 });
 
-const roomState = {}; // stores audio + play state per room
+const roomState = {};
+const roomUsers = {};
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  socket.on("join", (roomId) => {
+  socket.on("join", (roomId, userName) => {
     socket.join(roomId);
-    console.log("User", socket.id, "joined room", roomId);
+    socket.data.room = roomId;
+    socket.data.name = userName;
+
+    if (!roomUsers[roomId]) roomUsers[roomId] = {};
+    roomUsers[roomId][socket.id] = userName;
+    io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
+
     if (roomState[roomId]) {
       socket.emit("room-state", roomState[roomId]);
     }
@@ -87,6 +94,11 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
+    const roomId = socket.data.room;
+    if (roomId && roomUsers[roomId]) {
+      delete roomUsers[roomId][socket.id];
+      io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
+    }
   });
 });
 
