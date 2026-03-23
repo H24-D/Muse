@@ -33,7 +33,7 @@ function App() {
   useEffect(() => {
     socket.on("room-users", (users) => {
       setRoomUsers(users);
-      setJoined(true); // only join UI after server confirms
+      setJoined(true);
     });
     socket.on("user-joined", (userName) => showToast(`${userName} joined the room 🎉`, "join"));
     socket.on("user-left", (userName) => showToast(`${userName} left the room 👋`, "leave"));
@@ -55,10 +55,16 @@ function App() {
     setRoom(roomId);
     setName(userName);
     localStorage.setItem("userName", userName);
-
-    // Don't set joined yet — wait for server confirmation via room-users event
     const emit = () => socket.emit("join", roomId, userName, password, maxUsers);
     socket.connected ? emit() : socket.once("connect", emit);
+  };
+
+  const handleLeave = () => {
+    setJoined(false);
+    setRoom("");
+    setName("");
+    setRoomUsers([]);
+    setJoinError("");
   };
 
   if (!serverReady) return <ServerWakeup onReady={handleServerReady} />;
@@ -76,8 +82,16 @@ function App() {
               <h2 className="text-4xl font-bold text-center text-white">
                 🎶 Welcome to <span className="text-indigo-400">Muse</span>
               </h2>
-              <div className="bg-gray-800 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500 font-mono text-sm shadow">
-                Room ID: <span className="font-semibold">{room}</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-gray-800 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500 font-mono text-sm shadow">
+                  Room ID: <span className="font-semibold">{room}</span>
+                </div>
+                <button
+                  onClick={handleLeave}
+                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg transition font-semibold shadow"
+                >
+                  🚪 Leave
+                </button>
               </div>
             </div>
 
