@@ -23,29 +23,6 @@ function App() {
     return () => socket.off("room-users");
   }, []);
 
-  useEffect(() => {
-    if (!serverReady) return;
-    const params = new URLSearchParams(window.location.search);
-    const roomFromUrl = params.get("room");
-    if (roomFromUrl) {
-      setRoom(roomFromUrl);
-      const savedName = localStorage.getItem("userName");
-      if (savedName) {
-        setName(savedName);
-        setJoined(true);
-        setTimeout(() => {
-          if (socket.connected) {
-            socket.emit("join", roomFromUrl, savedName);
-          } else {
-            socket.once("connect", () => {
-              socket.emit("join", roomFromUrl, savedName);
-            });
-          }
-        }, 500);
-      }
-    }
-  }, [serverReady]);
-
   const handleJoin = (roomId, userName) => {
     setRoom(roomId);
     setName(userName);
