@@ -40,13 +40,17 @@ const roomUsers = {};
 const roomSettings = {};
 
 const cleanupRoom = (roomId, userName, notify = true) => {
-  if (!roomUsers[roomId]) return;
+  if (!roomUsers[roomId]) {
+    console.log(`Room ${roomId} already gone`);
+    return;
+  }
   const remaining = Object.keys(roomUsers[roomId]).length;
+  console.log(`Room ${roomId} has ${remaining} users remaining after ${userName} left`);
   if (remaining === 0) {
     delete roomUsers[roomId];
     delete roomSettings[roomId];
     delete roomState[roomId];
-    console.log(`Room ${roomId} cleaned up`);
+    console.log(`Room ${roomId} fully cleaned up ✅`);
   } else if (notify) {
     io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
     io.to(roomId).emit("user-left", userName);
@@ -58,19 +62,23 @@ io.on("connection", (socket) => {
 
   socket.on("join", (roomId, userName, password, maxUsers) => {
     const isNewRoom = !roomSettings[roomId];
+    console.log(`Join attempt: room=${roomId} user=${userName} isNewRoom=${isNewRoom}`);
 
     if (isNewRoom) {
       roomSettings[roomId] = {
         password: password || null,
         maxUsers: maxUsers || null,
       };
+      console.log(`Room ${roomId} created with password=${password || "none"}`);
     } else {
       if (roomSettings[roomId].password && roomSettings[roomId].password !== password) {
+        console.log(`Wrong password for room ${roomId}`);
         socket.emit("join-error", "❌ Wrong password!");
         return;
       }
       const currentUsers = Object.keys(roomUsers[roomId] || {}).length;
       if (roomSettings[roomId].maxUsers && currentUsers >= roomSettings[roomId].maxUsers) {
+        console.log(`Room ${roomId} is full`);
         socket.emit("join-error", "❌ Room is full!");
         return;
       }
@@ -95,6 +103,7 @@ io.on("connection", (socket) => {
 
   socket.on("leave-room", (roomId) => {
     const userName = socket.data.name;
+    console.log(`leave-room: user=${userName} room=${roomId}`);
     socket.leave(roomId);
     socket.data.room = null;
     socket.data.name = null;
