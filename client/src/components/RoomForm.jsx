@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export default function RoomForm({ onJoin }) {
+export default function RoomForm({ onJoin, error }) {
   const params = new URLSearchParams(window.location.search);
   const roomFromUrl = params.get("room") || "";
 
@@ -59,7 +59,6 @@ export default function RoomForm({ onJoin }) {
           />
         </div>
 
-        {/* Advanced options toggle */}
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
@@ -71,7 +70,9 @@ export default function RoomForm({ onJoin }) {
         {showAdvanced && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-2">🔒 Room Password (optional)</label>
+              <label className="block text-sm font-semibold mb-2">
+                🔒 Room Password <span className="text-white/50 font-normal">(optional)</span>
+              </label>
               <input
                 type="password"
                 value={password}
@@ -81,7 +82,9 @@ export default function RoomForm({ onJoin }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">👥 Max Users (optional)</label>
+              <label className="block text-sm font-semibold mb-2">
+                👥 Max Users <span className="text-white/50 font-normal">(optional)</span>
+              </label>
               <input
                 type="number"
                 min="2"
@@ -93,6 +96,10 @@ export default function RoomForm({ onJoin }) {
               />
             </div>
           </div>
+        )}
+
+        {error && (
+          <p className="text-red-400 text-sm text-center font-medium">{error}</p>
         )}
 
         <button
