@@ -107,7 +107,6 @@ export default function AudioPlayer({ room, name }) {
     <div style={cardStyle}>
       <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "12px" }}>🎧 Audio Player</div>
 
-      {/* Upload */}
       <label style={{
         display: "block", width: "100%", padding: "10px",
         background: "rgba(124,58,237,0.2)", border: "1px dashed rgba(124,58,237,0.5)",
@@ -119,14 +118,12 @@ export default function AudioPlayer({ room, name }) {
         <input type="file" accept="audio/*" onChange={loadAudio} disabled={uploading} style={{ display: "none" }} />
       </label>
 
-      {/* Waveform */}
       <div
         ref={waveformRef}
         onClick={handleSeek}
         style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", cursor: "pointer", marginBottom: "8px" }}
       />
 
-      {/* Progress bar */}
       <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: "4px", height: "3px", marginBottom: "4px" }}>
         <div style={{ background: "#a78bfa", borderRadius: "4px", height: "3px", width: `${progress}%`, transition: "width 0.3s" }} />
       </div>
@@ -135,17 +132,18 @@ export default function AudioPlayer({ room, name }) {
         <span>{formatTime(duration)}</span>
       </div>
 
-      {/* Controls */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
         <button onClick={handlePlay} disabled={!file} style={{
           padding: "10px", background: "#065f46", border: "1px solid #059669",
           borderRadius: "10px", color: "#6ee7b7", fontSize: "13px",
-          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4
+          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4,
+          WebkitTextFillColor: "#6ee7b7"
         }}>▶ Play</button>
         <button onClick={handlePause} disabled={!file} style={{
           padding: "10px", background: "#7f1d1d", border: "1px solid #991b1b",
           borderRadius: "10px", color: "#fca5a5", fontSize: "13px",
-          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4
+          fontWeight: 600, cursor: "pointer", opacity: file ? 1 : 0.4,
+          WebkitTextFillColor: "#fca5a5"
         }}>⏸ Pause</button>
       </div>
     </div>
