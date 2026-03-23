@@ -9,7 +9,6 @@ export default function RoomForm({ onJoin, error }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [maxUsers, setMaxUsers] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const generateRoom = () => setRoom(uuidv4().slice(0, 6));
 
@@ -26,7 +25,7 @@ export default function RoomForm({ onJoin, error }) {
       </h1>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 space-y-6"
+        className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 space-y-5"
       >
         <div>
           <label className="block text-sm font-semibold mb-2">Room ID</label>
@@ -59,44 +58,33 @@ export default function RoomForm({ onJoin, error }) {
           />
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-indigo-300 hover:text-white transition"
-        >
-          {showAdvanced ? "▲ Hide" : "▼ Show"} advanced options
-        </button>
+        <div>
+          <label className="block text-sm font-semibold mb-2">
+            🔒 Room Password <span className="text-white/50 font-normal">(optional)</span>
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            placeholder="Leave blank for no password"
+          />
+        </div>
 
-        {showAdvanced && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                🔒 Room Password <span className="text-white/50 font-normal">(optional)</span>
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                placeholder="Leave blank for no password"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                👥 Max Users <span className="text-white/50 font-normal">(optional)</span>
-              </label>
-              <input
-                type="number"
-                min="2"
-                max="20"
-                value={maxUsers}
-                onChange={(e) => setMaxUsers(e.target.value)}
-                className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                placeholder="No limit"
-              />
-            </div>
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-semibold mb-2">
+            👥 Max Users <span className="text-white/50 font-normal">(optional)</span>
+          </label>
+          <input
+            type="number"
+            min="2"
+            max="20"
+            value={maxUsers}
+            onChange={(e) => setMaxUsers(e.target.value)}
+            className="w-full px-4 py-2 rounded-md text-white bg-gradient-to-br from-indigo-600 to-blue-600 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            placeholder="No limit"
+          />
+        </div>
 
         {error && (
           <p className="text-red-400 text-sm text-center font-medium">{error}</p>
