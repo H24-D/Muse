@@ -72,7 +72,6 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("user-joined", userName);
     io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
 
-    // Send room-state after a short delay so WaveSurfer has time to initialize
     if (roomState[roomId]) {
       setTimeout(() => {
         socket.emit("room-state", roomState[roomId]);
@@ -112,8 +111,17 @@ io.on("connection", (socket) => {
     const userName = socket.data.name;
     if (roomId && roomUsers[roomId]) {
       delete roomUsers[roomId][socket.id];
-      io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
-      io.to(roomId).emit("user-left", userName);
+      const remaining = Object.keys(roomUsers[roomId]).length;
+
+      if (remaining === 0) {
+        delete roomUsers[roomId];
+        delete roomSettings[roomId];
+        delete roomState[roomId];
+        console.log(`Room ${roomId} is empty, cleaned up`);
+      } else {
+        io.to(roomId).emit("room-users", Object.values(roomUsers[roomId]));
+        io.to(roomId).emit("user-left", userName);
+      }
     }
   });
 });
