@@ -7,8 +7,13 @@ import socket from "./socket";
 
 function Toast({ message, type }) {
   return (
-    <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium transition-all
-      ${type === "join" ? "bg-green-600" : type === "leave" ? "bg-red-600" : "bg-yellow-600"}`}>
+    <div style={{
+      position: "fixed", top: "16px", right: "16px", zIndex: 50,
+      padding: "12px 16px", borderRadius: "10px",
+      fontSize: "13px", fontWeight: 600, color: "#fff",
+      background: type === "join" ? "#065f46" : type === "leave" ? "#7f1d1d" : "#92400e",
+      border: `1px solid ${type === "join" ? "#059669" : type === "leave" ? "#991b1b" : "#b45309"}`
+    }}>
       {message}
     </div>
   );
@@ -35,13 +40,12 @@ function App() {
       setRoomUsers(users);
       setJoined(true);
     });
-    socket.on("user-joined", (userName) => showToast(`${userName} joined the room 🎉`, "join"));
-    socket.on("user-left", (userName) => showToast(`${userName} left the room 👋`, "leave"));
+    socket.on("user-joined", (userName) => showToast(`${userName} joined 🎉`, "join"));
+    socket.on("user-left", (userName) => showToast(`${userName} left 👋`, "leave"));
     socket.on("join-error", (msg) => {
       setJoinError(msg);
       setJoined(false);
     });
-
     return () => {
       socket.off("room-users");
       socket.off("user-joined");
@@ -71,64 +75,107 @@ function App() {
   if (!serverReady) return <ServerWakeup onReady={handleServerReady} />;
 
   return (
-    <>
+    <div style={{ minHeight: "100vh", background: "#0d0d1a", fontFamily: "sans-serif" }}>
       {toast && <Toast message={toast.message} type={toast.type} />}
 
       {!joined ? (
         <RoomForm onJoin={handleJoin} error={joinError} />
       ) : (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center px-6 py-12">
-          <div className="w-full max-w-6xl bg-gray-900 text-white rounded-xl shadow-xl border border-gray-700 p-10 space-y-12">
-            <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-              <h2 className="text-4xl font-bold text-center text-white">
-                🎶 Welcome to <span className="text-indigo-400">Muse</span>
-              </h2>
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-800 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500 font-mono text-sm shadow">
-                  Room ID: <span className="font-semibold">{room}</span>
-                </div>
-                <button
-                  onClick={handleLeave}
-                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg transition font-semibold shadow"
-                >
-                  🚪 Leave
-                </button>
+        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "0 0 32px" }}>
+
+          {/* Topbar */}
+          <div style={{
+            background: "#0d0d1a", padding: "14px 16px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            position: "sticky", top: 0, zIndex: 10
+          }}>
+            <div style={{ fontSize: "20px", fontWeight: 700, color: "#fff" }}>
+              🎶 <span style={{ color: "#a78bfa" }}>Muse</span>
+            </div>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div style={{
+                background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)",
+                borderRadius: "8px", padding: "4px 10px",
+                fontSize: "12px", color: "#c4b5fd", fontFamily: "monospace"
+              }}>
+                {room}
               </div>
-            </div>
-
-            {/* Who's in the room */}
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-sm text-gray-400">🎧 Listening:</span>
-              {roomUsers.map((u, i) => (
-                <span key={i} className="bg-indigo-700 text-white text-xs px-3 py-1 rounded-full font-medium">
-                  {u}
-                </span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <AudioPlayer room={room} name={name} />
-              <ChatBox room={room} name={name} />
-            </div>
-
-            <div className="text-center mt-10">
-              <p className="text-md font-semibold mb-3 text-gray-300">🔗 Share this Room</p>
-              <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap shadow-sm">
-                <span className="text-sm font-mono break-all text-gray-400">
-                  {`${window.location.origin}/?room=${room}`}
-                </span>
-                <button
-                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-                >
-                  📋 Copy Link
-                </button>
-              </div>
+              <button onClick={handleLeave} style={{
+                background: "#7f1d1d", border: "1px solid #991b1b",
+                borderRadius: "8px", padding: "6px 12px",
+                color: "#fca5a5", fontSize: "12px", fontWeight: 600, cursor: "pointer"
+              }}>
+                🚪 Leave
+              </button>
             </div>
           </div>
+
+          {/* Listeners */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "8px",
+            padding: "10px 16px", flexWrap: "wrap",
+            background: "rgba(255,255,255,0.02)",
+            borderBottom: "1px solid rgba(255,255,255,0.05)"
+          }}>
+            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>🎧 Listening:</span>
+            {roomUsers.map((u, i) => (
+              <span key={i} style={{
+                background: "#4c1d95", border: "1px solid #6d28d9",
+                borderRadius: "20px", padding: "3px 10px",
+                fontSize: "12px", color: "#c4b5fd"
+              }}>{u}</span>
+            ))}
+          </div>
+
+          {/* Audio Player */}
+          <div style={{ margin: "12px" }}>
+            <AudioPlayer room={room} name={name} />
+          </div>
+
+          {/* Chat */}
+          <div style={{ margin: "12px" }}>
+            <ChatBox room={room} name={name} />
+          </div>
+
+          {/* Share */}
+          <div style={{
+            margin: "12px",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "16px", padding: "14px"
+          }}>
+            <div style={{ fontSize: "14px", fontWeight: 600, color: "#a78bfa", marginBottom: "8px" }}>🔗 Share Room</div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: "10px", padding: "10px 12px"
+            }}>
+              <span style={{
+                flex: 1, fontSize: "12px", color: "rgba(255,255,255,0.3)",
+                fontFamily: "monospace", overflow: "hidden",
+                textOverflow: "ellipsis", whiteSpace: "nowrap"
+              }}>
+                {`${window.location.origin}/?room=${room}`}
+              </span>
+              <button
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/?room=${room}`)}
+                style={{
+                  padding: "6px 12px", background: "#4c1d95",
+                  border: "1px solid #6d28d9", borderRadius: "8px",
+                  color: "#c4b5fd", fontSize: "12px", fontWeight: 600,
+                  cursor: "pointer", flexShrink: 0
+                }}
+              >
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
         </div>
       )}
-    </>
+    </div>
   );
 }
 
