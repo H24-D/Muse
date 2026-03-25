@@ -5,13 +5,13 @@ A real-time collaborative music listening app. Upload a song and listen in sync 
 ## 📸 Screenshots
 
 ### Login Page
-![Login Page](Muse/login.png)
+![Login Page](screenshots/login.png)
 
 ### Room — Desktop
-![Desktop Room](Muse/audio.png)
+![Desktop Room](screenshots/roomform.png)
 
 ### Room — Mobile
-![Mobile Room](Muse/mobile.jpeg)
+![Mobile Room](screenshots/mobileroomform.jpeg)
 
 ## ✨ Features
 
